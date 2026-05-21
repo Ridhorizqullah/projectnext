@@ -40,16 +40,28 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 4. PROTEKSI RUTE: Jika user BELUM login dan mencoba membuka halaman selain halaman '/login'
-  if (!user && request.nextUrl.pathname !== '/login') {
+  const pathname = request.nextUrl.pathname;
+  
+  // Rute auth luar (jika sudah login, dilarang mengakses ini dan akan dilempar ke '/')
+  const isAuthRoute = pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password';
+
+  // Rute callback (untuk token exchange Supabase, bypass seluruh pemeriksaan redirect)
+  const isCallbackRoute = pathname.startsWith('/auth/callback');
+
+  if (isCallbackRoute) {
+    return supabaseResponse;
+  }
+
+  // 4. PROTEKSI RUTE: Jika user BELUM login dan mencoba membuka halaman selain halaman auth
+  if (!user && !isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     // Alihkan (redirect) user ke halaman login
     return NextResponse.redirect(url);
   }
 
-  // 5. PROTEKSI RUTE: Jika user SUDAH login dan mencoba membuka halaman '/login'
-  if (user && request.nextUrl.pathname === '/login') {
+  // 5. PROTEKSI RUTE: Jika user SUDAH login dan mencoba membuka halaman auth
+  if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     // Alihkan (redirect) user kembali ke halaman utama (home)
