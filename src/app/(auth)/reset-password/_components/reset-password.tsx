@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/field';
 import { ResetPasswordForm, resetPasswordSchema } from '@/validations/auth-validation';
 import { resetPasswordAction } from '../action';
+import { toast } from 'sonner';
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function ResetPassword() {
           });
         } else {
           setErrorMsg('Terjadi kesalahan yang tidak diketahui');
+          toast.error('Koneksi gagal atau terjadi kesalahan server');
         }
       }
     } catch (err: any) {

@@ -15,6 +15,7 @@ import { LoginForm, loginSchemaForm } from '@/validations/auth-validation';
 
 import { login } from '../action';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +51,8 @@ export default function Login() {
       }
     } catch (e: any) {
       console.error(e);
-      setError('Koneksi gagal atau terjadi kesalahan server');
+      toast.error('Koneksi gagal atau terjadi kesalahan server');
+    
     } finally {
       setIsPending(false);
     }

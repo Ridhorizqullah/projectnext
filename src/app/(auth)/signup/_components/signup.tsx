@@ -11,10 +11,12 @@ import {
   FieldLabel,
   FieldError,
 } from '@/components/ui/field';
+import { INITIAL_SIGNUP_FORM } from '@/constants/auth-constant';
 import { SignupForm, signupSchema } from '@/validations/auth-validation';
 
 import { signupAction } from '../action';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Signup() {
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +61,7 @@ export default function Signup() {
       setError('Koneksi gagal atau terjadi kesalahan server');
     } finally {
       setIsPending(false);
+      toast.error('Koneksi gagal atau terjadi kesalahan server');
     }
   });
 

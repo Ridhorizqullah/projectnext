@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/field';
 import { ForgotPasswordForm, forgotPasswordSchema } from '@/validations/auth-validation';
 import { forgotPasswordAction } from '../action';
+import { toast } from 'sonner';
 
 export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
@@ -49,6 +50,7 @@ export default function ForgotPassword() {
           });
         } else {
           setErrorMsg('Terjadi kesalahan yang tidak diketahui');
+          toast.error('Koneksi gagal atau terjadi kesalahan server');
         }
       }
     } catch (err: any) {
