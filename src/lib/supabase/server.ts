@@ -10,7 +10,7 @@ type CreateClientOptions = {
 }
 
 // Fungsi untuk membuat client Supabase yang berjalan di sisi server (Node.js runtime)
-export async function createClient({ isAdmin = false }: CreateClientOptions) {
+export async function createClient({ isAdmin = false }: CreateClientOptions = {}) {
   // Mengambil cookie store dari request untuk sinkronisasi sesi auth
   const cookieStore = await cookies();
   const { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } =

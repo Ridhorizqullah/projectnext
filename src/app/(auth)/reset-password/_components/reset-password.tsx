@@ -13,9 +13,8 @@ import {
   FieldLabel,
   FieldError,
 } from '@/components/ui/field';
-import { INITIAL_RESET_PASSWORD_FORM } from '@/constants/auth-constant';
 import { ResetPasswordForm, resetPasswordSchema } from '@/validations/auth-validation';
-import { createClient } from '@/lib/supabase/client';
+import { resetPasswordAction } from '../action';
 
 export default function ResetPassword() {
   const router = useRouter();
@@ -23,11 +22,13 @@ export default function ResetPassword() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [countdown, setCountdown] = useState(3);
-  const supabase = createClient();
 
-  const { control, handleSubmit } = useForm<ResetPasswordForm>({
+  const { control, handleSubmit, setError: setFieldError } = useForm<ResetPasswordForm>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: INITIAL_RESET_PASSWORD_FORM,
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
   });
 
   useEffect(() => {
@@ -47,16 +48,28 @@ export default function ResetPassword() {
     setErrorMsg(null);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: data.password,
-      });
+      const result = await resetPasswordAction(data);
 
-      if (error) {
-        setErrorMsg(error.message || 'Gagal memperbarui password. Silakan coba lagi.');
-      } else {
+      if (result.status === 'success') {
         setSuccess(true);
+      } else if (result.status === 'error') {
+        if (result.errors) {
+          Object.entries(result.errors).forEach(([key, value]) => {
+            if (key === '_form') {
+              setErrorMsg(value?.[0] || 'Terjadi kesalahan');
+            } else {
+              setFieldError(key as any, {
+                type: 'server',
+                message: value?.[0] || 'Kolom tidak valid',
+              });
+            }
+          });
+        } else {
+          setErrorMsg('Terjadi kesalahan yang tidak diketahui');
+        }
       }
     } catch (err: any) {
+      console.error(err);
       setErrorMsg(err.message || 'Terjadi kesalahan sistem. Silakan coba lagi.');
     } finally {
       setLoading(false);
@@ -119,6 +132,7 @@ export default function ResetPassword() {
                     placeholder="Masukkan password baru"
                     autoComplete="new-password"
                     aria-invalid={fieldState.invalid}
+                    disabled={loading}
                     className="pl-11 h-12 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 placeholder:text-muted-foreground/60 transition-all text-base md:text-sm"
                   />
                 </div>
@@ -149,6 +163,7 @@ export default function ResetPassword() {
                     placeholder="Masukkan kembali password baru"
                     autoComplete="new-password"
                     aria-invalid={fieldState.invalid}
+                    disabled={loading}
                     className="pl-11 h-12 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 placeholder:text-muted-foreground/60 transition-all text-base md:text-sm"
                   />
                 </div>

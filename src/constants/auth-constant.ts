@@ -9,8 +9,11 @@ export const INITIAL_SIGNUP_FORM = {
   password: '',
 };
 
-export const INITIAL_RESET_PASSWORD_FORM = {
-  password: '',
-  confirmPassword: '',
+export const INITIAL_STATE_LOGIN_FORM = {
+  status: 'idle',
+  errors: {
+    email: [],
+    password: [],
+    _form: [],
+  },
 };
-

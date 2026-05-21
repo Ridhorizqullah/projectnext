@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Zap, Mail, Lock, Coffee } from 'lucide-react';
+import { Zap, Mail, Lock, Coffee, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,17 +11,49 @@ import {
   FieldLabel,
   FieldError,
 } from '@/components/ui/field';
-import { INITIAL_LOGIN_FORM } from '@/constants/auth-constant';
-import { LoginForm, loginSchema } from '@/validations/auth-validation';
+import { LoginForm, loginSchemaForm } from '@/validations/auth-validation';
+
+import { login } from '../action';
+import { useState } from 'react';
 
 export default function Login() {
-  const { control, handleSubmit } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: INITIAL_LOGIN_FORM,
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
+  const { control, handleSubmit, setError: setFieldError } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchemaForm),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('Login data submitted:', data);
+    setIsPending(true);
+    setError(null);
+    try {
+      const result = await login(data);
+      if (result?.status === 'error') {
+        if (result.errors) {
+          Object.entries(result.errors).forEach(([key, value]) => {
+            if (key === '_form') {
+              setError(value?.[0] || 'Terjadi kesalahan');
+            } else {
+              setFieldError(key as any, {
+                type: 'server',
+                message: value?.[0] || 'Kolom tidak valid',
+              });
+            }
+          });
+        } else {
+          setError('Terjadi kesalahan yang tidak diketahui');
+        }
+      }
+    } catch (e: any) {
+      console.error(e);
+      setError('Koneksi gagal atau terjadi kesalahan server');
+    } finally {
+      setIsPending(false);
+    }
   });
 
   return (
@@ -37,6 +69,13 @@ export default function Login() {
       </div>
 
       <form onSubmit={onSubmit} className="space-y-5">
+        {error && (
+          <div className="p-3.5 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400 rounded-xl border border-red-200 dark:border-red-900/50 flex items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-red-400 shrink-0" />
+            <span className="font-medium">{error}</span>
+          </div>
+        )}
+
         {/* Email Field */}
         <Controller
           control={control}
@@ -57,6 +96,7 @@ export default function Login() {
                   placeholder="Please enter your email"
                   autoComplete="email"
                   aria-invalid={fieldState.invalid}
+                  disabled={isPending}
                   className="pl-11 h-12 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 placeholder:text-muted-foreground/60 transition-all text-base md:text-sm"
                 />
               </div>
@@ -89,6 +129,7 @@ export default function Login() {
                   placeholder="Please enter your password"
                   autoComplete="current-password"
                   aria-invalid={fieldState.invalid}
+                  disabled={isPending}
                   className="pl-11 h-12 rounded-xl border-slate-200 dark:border-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:border-indigo-500 placeholder:text-muted-foreground/60 transition-all text-base md:text-sm"
                 />
               </div>
@@ -99,12 +140,19 @@ export default function Login() {
           )}
         />
         
-        {/* Action Button */}
         <Button
           type="submit"
-          className="w-full h-12 bg-[#222] hover:bg-[#111] text-white font-medium rounded-xl transition-all shadow-sm hover:shadow active:scale-[0.99] dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 mt-2 text-base"
+          disabled={isPending}
+          className="w-full h-12 bg-[#222] hover:bg-[#111] text-white font-medium rounded-xl transition-all shadow-sm hover:shadow active:scale-[0.99] dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 mt-2 text-base flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
         >
-          Log in
+          {isPending ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Logging in...</span>
+            </>
+          ) : (
+            'Log in'
+          )}
         </Button>
       </form>
 
