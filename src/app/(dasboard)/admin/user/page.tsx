@@ -1,7 +1,10 @@
+import UserManagement from '@/app/(dasboard)/_components/user';
+
+export const metadata = {
+  title: 'Cafetaria | User Management',
+};
+
 export default function UserManagementPage() {
-  return (
-    <div>
-      <h1>User Management</h1>
-    </div>
-  );
+  return <UserManagement />;
 }
+
