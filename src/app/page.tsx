@@ -1,15 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { DarkModeToggle } from "@/components/ui/common/darkmode-toggle";
-import { Input } from "@/components/ui/input";
-
-
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div>
-      <Input/>
-      <Button className='bg-red-400 dark:bg-amber-600'>click me</Button>
-      <DarkModeToggle/>
+    <div className="bg-muted flex justify-center items-center h-screen flex-col space-y-4">
+      <h1 className="text-4xl font-semibold">Welcome suddensae</h1>
+      <Link href="/admin">
+        <Button className="bg-blue-500 text-white">Access Dashboard</Button>
+      </Link>
     </div>
   );
 }

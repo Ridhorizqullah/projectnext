@@ -5,6 +5,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -21,12 +23,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  SIDEBAR_MENU_LIST,
+  SidebarMenuKey,
+} from '@/constants/sidebar-constant';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AppSidebar() {
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
+  const profile = {
+    name: 'Avip Syaifulloh',
+    role: 'admin',
+    avatar_url: '',
+  };
   return (
-    <Sidebar>
-      {/* Header Sidebar berisi identitas aplikasi / logo kafe */}
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -36,30 +50,52 @@ export default function AppSidebar() {
                   <Coffee className="size-4 text-white" />
                 </div>
                 Cafetaria
-              </div>    
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-
-      {/* SidebarContent diset flex-1 (flex-grow) untuk mengisi seluruh ruang tengah yang kosong di sidebar. */}
-      {/* Hal ini bertujuan mendorong SidebarFooter secara otomatis ke pojok kiri bawah (posisi paling bawah sidebar). */}
-      <SidebarContent className="flex-1" />
-
-      {/* Footer Sidebar berisi informasi profil user aktif dan menu interaktif (Logout) dalam bentuk DropdownMenu */}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent className="flex flex-col gap-2">
+            <SidebarMenu>
+              {SIDEBAR_MENU_LIST[profile.role as SidebarMenuKey]?.map(
+                (item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <Link
+                        href={item.url}
+                        className={cn('px-4 py-3 h-auto', {
+                          'bg-blue-500 text-white hover:bg-blue-500 hover:text-white':
+                            pathname === item.url,
+                        })}
+                      >
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ),
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
-              {/* Trigger Dropdown menggunakan profil user (avatar + nama + role) yang rapi */}
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg">
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src="" alt="" />
                     <AvatarFallback className="rounded-lg">A</AvatarFallback>
                   </Avatar>
                   <div className="leading-tight">
-                    <h4 className="truncate font-medium">suddensae</h4>
+                    <h4 className="truncate font-medium">Avip Syaifulloh</h4>
                     <p className="text-muted-foreground truncate text-xs">
                       Admin
                     </p>
@@ -67,8 +103,6 @@ export default function AppSidebar() {
                   <EllipsisVertical className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              
-              {/* Menu dropdown yang menyesuaikan orientasi layar (mobile di bawah, desktop di kanan sidebar) */}
               <DropdownMenuContent
                 className="min-w-56 rounded-lg"
                 side={isMobile ? 'bottom' : 'right'}
@@ -82,7 +116,7 @@ export default function AppSidebar() {
                       <AvatarFallback className="rounded-lg">A</AvatarFallback>
                     </Avatar>
                     <div className="leading-tight">
-                      <h4 className="truncate font-medium">suddensae</h4>
+                      <h4 className="truncate font-medium">Avip Syaifulloh</h4>
                       <p className="text-muted-foreground truncate text-xs">
                         Admin
                       </p>
